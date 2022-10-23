@@ -3,6 +3,7 @@ package net.datafaker.sequence;
 import net.datafaker.service.RandomService;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -23,6 +24,11 @@ public class FakeCollection<T> extends FakeSequence<T> {
         return result;
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return get().iterator();
+    }
+    
     public static class Builder<T> extends FakeSequence.Builder<T> {
         public Builder() {
             super();

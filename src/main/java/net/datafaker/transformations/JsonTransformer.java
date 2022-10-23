@@ -1,14 +1,10 @@
 package net.datafaker.transformations;
 
+import net.datafaker.sequence.FakeSequence;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class JsonTransformer<IN> implements Transformer<IN, Object> {
   private static final Map<Character, String> ESCAPING_MAP = createEscapeMap();
@@ -38,9 +34,17 @@ public class JsonTransformer<IN> implements Transformer<IN, Object> {
   }
 
   @Override
-  public String generate(List<IN> input, Schema<IN, ?> schema) {
-    String result = input.stream().map(t -> apply(t, schema)).collect(Collectors.joining(",\n"));
-    return input.size() > 1 ? "{\n" + result + "}" : result;
+  public String generate(FakeSequence<IN> input, Schema<IN, ?> schema) {
+    if (input.isInfinite()) {
+      throw new IllegalArgumentException("The sequence should be finite of size");
+    }
+    
+    StringJoiner data = new StringJoiner(System.lineSeparator());
+    for (IN in : input) {
+      data.add(apply(in, schema));
+    }
+    
+    return data.length() > 1 ? "{\n" + data + "}" : data.toString();
   }
 
   @Override

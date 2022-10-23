@@ -1,6 +1,8 @@
 package net.datafaker.transformations;
 
-import java.util.List;
+import net.datafaker.sequence.FakeSequence;
+
+import java.util.StringJoiner;
 
 public class SqlTransformer<IN> implements Transformer<IN, CharSequence> {
     private static final char DEFAULT_QUOTE = '\'';
@@ -101,15 +103,17 @@ public class SqlTransformer<IN> implements Transformer<IN, CharSequence> {
     }
 
     @Override
-    public String generate(List<IN> input, Schema<IN, ?> schema) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < input.size(); i++) {
-            sb.append(apply(input.get(i), schema));
-            if (i < input.size() - 1) {
-                sb.append("\n");
-            }
+    public String generate(FakeSequence<IN> input, Schema<IN, ?> schema) {
+        if (input.isInfinite()) {
+            throw new IllegalArgumentException("The sequence should be finite of size");
         }
-        return sb.toString();
+    
+        StringJoiner data = new StringJoiner(System.lineSeparator());
+        for (IN in : input) {
+            data.add(apply(in, schema));
+        }
+        
+        return data.toString();
     }
 
     @Override
